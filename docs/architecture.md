@@ -3,13 +3,14 @@
 Trip-planner API (`POST /trips` and friends) as a **modular monolith**:
 one deployable, five vertical slices, one shared kernel.
 Full rationale: [ADR 0001](adr/0001-modular-monolith-vertical-slices.md),
-events slice: [ADR 0002](adr/0002-trip-events-slice.md).
+events slice: [ADR 0002](adr/0002-trip-events-slice.md),
+Java 26 upgrade: [ADR 0003](adr/0003-java-26-spring-boot-4-upgrade.md).
 
 ## System context (C4 L1)
 
 ```mermaid
 flowchart LR
-    U["Traveler<br/>(Postman / frontend)"] -->|HTTP JSON :8080| API["java-journey-muse-lab<br/>Spring Boot 3.3.1 · Java 21"]
+    U["Traveler<br/>(Postman / frontend)"] -->|HTTP JSON :8080| API["java-journey-muse-lab<br/>Spring Boot 4.1.1 · Java 26"]
     API -->|JDBC embedded| DB[("H2 in-memory<br/>Flyway V1–V5")]
 ```
 

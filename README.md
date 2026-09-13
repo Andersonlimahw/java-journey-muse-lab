@@ -2,12 +2,12 @@
 
 Trip-planner API rebuilt **from zero** as a **modular monolith with vertical
 slices**, ported from `java-journey-lemon-lab` with the REST contract preserved
-and 4 latent bugs fixed. Spring Boot 3.3.1 · Java 21 · H2 + Flyway.
+and 4 latent bugs fixed. Spring Boot 4.1.1 · Java 26 · H2 + Flyway.
 
 ## Quickstart
 
-Prerequisites: JDK 21 (pinned in `.java-version` for jenv/sdkman/asdf;
-the build targets Java 21 bytecode, newer JDKs are untested), Maven 3.x.
+Prerequisites: JDK 26 (pinned in `.java-version` for jenv/sdkman/asdf;
+the build targets Java 26 bytecode), Maven 3.x.
 
 ```bash
 mvn test                    # 66 tests, 7 classes — must be green
