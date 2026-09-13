@@ -1,0 +1,223 @@
+{
+	"info": {
+		"_postman_id": "a1b2c3d4-muse-4a5b-8c9d-journey000001",
+		"name": "java-journey-muse-lab",
+		"description": "Trip planner API as a modular monolith with vertical slices. Run against a local instance (`mvn spring-boot:run`, default http://localhost:8080). Requests run in order and share state via collection variables (tripId, participantId, activityId, linkId).",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{ "key": "baseUrl", "value": "http://localhost:8080" },
+		{ "key": "tripId", "value": "" },
+		{ "key": "participantId", "value": "" },
+		{ "key": "activityId", "value": "" },
+		{ "key": "linkId", "value": "" }
+	],
+	"item": [
+		{
+			"name": "trips",
+			"item": [
+				{
+					"name": "Create Trip",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('status is 200', () => pm.response.to.have.status(200));",
+									"pm.test('returns trip uuid', () => {",
+									"  const body = pm.response.json();",
+									"  pm.expect(body.uuid).to.match(/^[0-9a-fA-F-]{36}$/);",
+									"  pm.collectionVariables.set('tripId', body.uuid);",
+									"});",
+									"pm.test('returns only invited participants', () => {",
+									"  pm.expect(pm.response.json().participants).to.have.lengthOf(1);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"destination\": \"Florianópolis, SC\",\n  \"starts_at\": \"2025-06-25T10:00:00\",\n  \"ends_at\": \"2025-07-02T10:00:00\",\n  \"emails_to_invite\": [\"dev@muse.dev\"],\n  \"owner_name\": \"Muse\",\n  \"owner_email\": \"muse@muse.dev\"\n}"
+						},
+						"url": "{{baseUrl}}/trips"
+					}
+				},
+				{
+					"name": "List Trips",
+					"event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status is 200 and body is array', () => {", "  pm.response.to.have.status(200);", "  pm.expect(pm.response.json()).to.be.an('array');", "});"] } }],
+					"request": { "method": "GET", "url": "{{baseUrl}}/trips" }
+				},
+				{
+					"name": "Get Trip",
+					"event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status is 200', () => pm.response.to.have.status(200));", "pm.test('destination matches', () => pm.expect(pm.response.json().destination).to.eql('Florianópolis, SC'));"] } }],
+					"request": { "method": "GET", "url": "{{baseUrl}}/trips/{{tripId}}" }
+				},
+				{
+					"name": "Get Trip Overview",
+					"event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status is 200', () => pm.response.to.have.status(200));", "pm.test('overview has owner fields', () => {", "  const body = pm.response.json();", "  pm.expect(body.ownerName).to.eql('Muse');", "  pm.expect(body.confirmed).to.eql(false);", "});"] } }],
+					"request": { "method": "GET", "url": "{{baseUrl}}/trips/{{tripId}}/overview" }
+				},
+				{
+					"name": "Update Trip",
+					"event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status is 200', () => pm.response.to.have.status(200));", "pm.test('startsAt was updated (bugfix)', () => pm.expect(pm.response.json().startsAt).to.eql('2025-07-01T10:00:00'));"] } }],
+					"request": {
+						"method": "PUT",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": { "mode": "raw", "raw": "{\n  \"destination\": \"Rio de Janeiro, RJ\",\n  \"starts_at\": \"2025-07-01T10:00:00\",\n  \"ends_at\": \"2025-07-10T10:00:00\"\n}" },
+						"url": "{{baseUrl}}/trips/{{tripId}}"
+					}
+				},
+				{
+					"name": "Invite Participant",
+					"event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status is 200', () => pm.response.to.have.status(200));", "pm.test('returns participant id', () => {", "  pm.expect(pm.response.json().id).to.match(/^[0-9a-fA-F-]{36}$/);", "});"] } }],
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": { "mode": "raw", "raw": "{\n  \"email\": \"guest@muse.dev\"\n}" },
+						"url": "{{baseUrl}}/trips/{{tripId}}/invite"
+					}
+				},
+				{
+					"name": "List Trip Participants",
+					"event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status is 200', () => pm.response.to.have.status(200));", "pm.test('has 2 participants', () => pm.expect(pm.response.json()).to.have.lengthOf(2));"] } }],
+					"request": { "method": "GET", "url": "{{baseUrl}}/trips/{{tripId}}/participants" }
+				},
+				{
+					"name": "Confirm Trip",
+					"event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status is 200', () => pm.response.to.have.status(200));", "pm.test('trip is confirmed', () => pm.expect(pm.response.json().confirmed).to.eql(true));"] } }],
+					"request": { "method": "PATCH", "url": "{{baseUrl}}/trips/{{tripId}}/confirmation" }
+				}
+			]
+		},
+		{
+			"name": "participants",
+			"item": [
+				{
+					"name": "Create Participant",
+					"event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status is 200', () => pm.response.to.have.status(200));", "pm.test('captures participant id', () => {", "  pm.expect(pm.response.json().id).to.match(/^[0-9a-fA-F-]{36}$/);", "  pm.collectionVariables.set('participantId', pm.response.json().id);", "});"] } }],
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": { "mode": "raw", "raw": "{\n  \"name\": \"Ada\",\n  \"email\": \"ada@muse.dev\",\n  \"trip_id\": \"{{tripId}}\"\n}" },
+						"url": "{{baseUrl}}/participants"
+					}
+				},
+				{
+					"name": "Get Participant",
+					"event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status is 200', () => pm.response.to.have.status(200));", "pm.test('email matches', () => pm.expect(pm.response.json().email).to.eql('ada@muse.dev'));"] } }],
+					"request": { "method": "GET", "url": "{{baseUrl}}/participants/{{participantId}}" }
+				},
+				{
+					"name": "Update Participant",
+					"event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status is 200', () => pm.response.to.have.status(200));", "pm.test('name updated', () => pm.expect(pm.response.json().name).to.eql('Ada Lovelace'));"] } }],
+					"request": {
+						"method": "PUT",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": { "mode": "raw", "raw": "{\n  \"name\": \"Ada Lovelace\",\n  \"email\": \"ada@muse.dev\"\n}" },
+						"url": "{{baseUrl}}/participants/{{participantId}}"
+					}
+				},
+				{
+					"name": "Confirm Participant",
+					"event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status is 200', () => pm.response.to.have.status(200));"] } }],
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": { "mode": "raw", "raw": "{\n  \"name\": \"Ada Lovelace\",\n  \"email\": \"ada@muse.dev\"\n}" },
+						"url": "{{baseUrl}}/participants/{{participantId}}/confirm"
+					}
+				},
+				{
+					"name": "Delete Participant",
+					"event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status is 204', () => pm.response.to.have.status(204));"] } }],
+					"request": { "method": "DELETE", "url": "{{baseUrl}}/participants/{{participantId}}" }
+				}
+			]
+		},
+		{
+			"name": "activities",
+			"item": [
+				{
+					"name": "Create Activity",
+					"event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status is 200', () => pm.response.to.have.status(200));", "pm.test('captures activity id', () => {", "  pm.expect(pm.response.json().activityId).to.match(/^[0-9a-fA-F-]{36}$/);", "  pm.collectionVariables.set('activityId', pm.response.json().activityId);", "});"] } }],
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": { "mode": "raw", "raw": "{\n  \"title\": \"Visit Museum\",\n  \"occurs_at\": \"2025-07-05T14:00:00\"\n}" },
+						"url": "{{baseUrl}}/trips/{{tripId}}/activities"
+					}
+				},
+				{
+					"name": "List Activities",
+					"event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status is 200 and array', () => {", "  pm.response.to.have.status(200);", "  pm.expect(pm.response.json()).to.be.an('array');", "});"] } }],
+					"request": { "method": "GET", "url": "{{baseUrl}}/trips/{{tripId}}/activities" }
+				},
+				{
+					"name": "Get Activity",
+					"event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status is 200', () => pm.response.to.have.status(200));", "pm.test('title matches', () => pm.expect(pm.response.json().title).to.eql('Visit Museum'));"] } }],
+					"request": { "method": "GET", "url": "{{baseUrl}}/trips/{{tripId}}/activities/{{activityId}}" }
+				},
+				{
+					"name": "Update Activity",
+					"event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status is 200', () => pm.response.to.have.status(200));", "pm.test('title updated', () => pm.expect(pm.response.json().title).to.eql('Visit Aquarium'));"] } }],
+					"request": {
+						"method": "PUT",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": { "mode": "raw", "raw": "{\n  \"title\": \"Visit Aquarium\",\n  \"occurs_at\": \"2025-07-06T10:00:00\"\n}" },
+						"url": "{{baseUrl}}/trips/{{tripId}}/activities/{{activityId}}"
+					}
+				},
+				{
+					"name": "Delete Activity",
+					"event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status is 204', () => pm.response.to.have.status(204));"] } }],
+					"request": { "method": "DELETE", "url": "{{baseUrl}}/trips/{{tripId}}/activities/{{activityId}}" }
+				}
+			]
+		},
+		{
+			"name": "links",
+			"item": [
+				{
+					"name": "Create Link",
+					"event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status is 200', () => pm.response.to.have.status(200));", "pm.test('captures link id', () => {", "  pm.expect(pm.response.json().linkId).to.match(/^[0-9a-fA-F-]{36}$/);", "  pm.collectionVariables.set('linkId', pm.response.json().linkId);", "});"] } }],
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": { "mode": "raw", "raw": "{\n  \"title\": \"Airbnb\",\n  \"url\": \"https://airbnb.com/rooms/1\"\n}" },
+						"url": "{{baseUrl}}/trips/{{tripId}}/links"
+					}
+				},
+				{
+					"name": "List Links",
+					"event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status is 200 and array', () => {", "  pm.response.to.have.status(200);", "  pm.expect(pm.response.json()).to.be.an('array');", "});"] } }],
+					"request": { "method": "GET", "url": "{{baseUrl}}/trips/{{tripId}}/links" }
+				},
+				{
+					"name": "Get Link",
+					"event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status is 200', () => pm.response.to.have.status(200));", "pm.test('title matches', () => pm.expect(pm.response.json().title).to.eql('Airbnb'));"] } }],
+					"request": { "method": "GET", "url": "{{baseUrl}}/trips/{{tripId}}/links/{{linkId}}" }
+				},
+				{
+					"name": "Update Link",
+					"event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status is 200', () => pm.response.to.have.status(200));", "pm.test('url updated', () => pm.expect(pm.response.json().url).to.eql('https://airbnb.com/rooms/2'));"] } }],
+					"request": {
+						"method": "PUT",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": { "mode": "raw", "raw": "{\n  \"title\": \"Airbnb\",\n  \"url\": \"https://airbnb.com/rooms/2\"\n}" },
+						"url": "{{baseUrl}}/trips/{{tripId}}/links/{{linkId}}"
+					}
+				},
+				{
+					"name": "Delete Link",
+					"event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status is 204', () => pm.response.to.have.status(204));"] } }],
+					"request": { "method": "DELETE", "url": "{{baseUrl}}/trips/{{tripId}}/links/{{linkId}}" }
+				}
+			]
+		}
+	]
+}

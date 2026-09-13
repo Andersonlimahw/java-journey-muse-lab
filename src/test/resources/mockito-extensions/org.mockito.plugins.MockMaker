@@ -1,0 +1,5 @@
+# Tests use zero Mockito mocks (pure MockMvc integration tests). The subclass
+# mock maker avoids ByteBuddy self-attach, which is blocked in sandboxed /
+# hardened runtimes where the JDK attach socket cannot be created
+# (see "Could not self-attach to current VM" from InlineByteBuddyMockMaker).
+mock-maker-subclass
