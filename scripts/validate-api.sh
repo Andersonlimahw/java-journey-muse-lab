@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Executable mirror of src/test/postman/java-journey-muse-lab.postman_collection.json.
-# Runs the same 23 requests in order against a local instance and asserts statuses.
+# Runs the same 29 requests in order against a local instance and asserts statuses.
 # Usage: ./scripts/validate-api.sh [baseUrl]   (default http://localhost:8080)
 set -euo pipefail
 
@@ -63,9 +63,18 @@ check "update link" 200 "$(curl -s -o /dev/null -w '%{http_code}' -X PUT "$BASE/
 check "delete link" 204 "$(curl -s -o /dev/null -w '%{http_code}' -X DELETE "$BASE/trips/$TRIP/links/$L")"
 check "deleted link is gone" 404 "$(curl -s -o /dev/null -w '%{http_code}' "$BASE/trips/$TRIP/links/$L")"
 
+echo "== events slice =="
+E=$(curl -s -X POST "$BASE/trips/$TRIP/events" -H 'Content-Type: application/json' -d '{"title":"Team Kickoff","description":"Trip kickoff meeting","location":"São Paulo","starts_at":"2025-07-05T14:00:00","ends_at":"2025-07-05T16:00:00"}' | jq -r .eventId)
+check "list events" 200 "$(curl -s -o /dev/null -w '%{http_code}' "$BASE/trips/$TRIP/events")"
+check "get event" 200 "$(curl -s -o /dev/null -w '%{http_code}' "$BASE/trips/$TRIP/events/$E")"
+check "update event" 200 "$(curl -s -o /dev/null -w '%{http_code}' -X PUT "$BASE/trips/$TRIP/events/$E" -H 'Content-Type: application/json' -d '{"title":"Team Kickoff v2","starts_at":"2025-07-05T14:00:00","ends_at":"2025-07-05T17:00:00"}')"
+check "delete event" 204 "$(curl -s -o /dev/null -w '%{http_code}' -X DELETE "$BASE/trips/$TRIP/events/$E")"
+check "deleted event is gone" 404 "$(curl -s -o /dev/null -w '%{http_code}' "$BASE/trips/$TRIP/events/$E")"
+
 echo "== negative cases =="
 check "unknown trip 404" 404 "$(curl -s -o /dev/null -w '%{http_code}' "$BASE/trips/00000000-0000-0000-0000-000000000000")"
 check "blank activity title 400" 400 "$(curl -s -o /dev/null -w '%{http_code}' -X POST "$BASE/trips/$TRIP/activities" -H 'Content-Type: application/json' -d '{"title":"","occurs_at":"2025-07-05T14:00:00"}')"
+check "event ends before starts 400" 400 "$(curl -s -o /dev/null -w '%{http_code}' -X POST "$BASE/trips/$TRIP/events" -H 'Content-Type: application/json' -d '{"title":"Bad Event","starts_at":"2025-07-06T16:00:00","ends_at":"2025-07-06T14:00:00"}')"
 
 echo ""
 echo "RESULT: $PASS passed, $FAIL failed"

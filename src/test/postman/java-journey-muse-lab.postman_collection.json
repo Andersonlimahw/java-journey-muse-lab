@@ -10,7 +10,8 @@
 		{ "key": "tripId", "value": "" },
 		{ "key": "participantId", "value": "" },
 		{ "key": "activityId", "value": "" },
-		{ "key": "linkId", "value": "" }
+		{ "key": "linkId", "value": "" },
+		{ "key": "eventId", "value": "" }
 	],
 	"item": [
 		{
@@ -216,6 +217,56 @@
 					"name": "Delete Link",
 					"event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status is 204', () => pm.response.to.have.status(204));"] } }],
 					"request": { "method": "DELETE", "url": "{{baseUrl}}/trips/{{tripId}}/links/{{linkId}}" }
+				}
+			]
+		},
+		{
+			"name": "events",
+			"item": [
+				{
+					"name": "Create Event",
+					"event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status is 200', () => pm.response.to.have.status(200));", "pm.test('captures event id', () => {", "  pm.expect(pm.response.json().eventId).to.match(/^[0-9a-fA-F-]{36}$/);", "  pm.collectionVariables.set('eventId', pm.response.json().eventId);", "});"] } }],
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": { "mode": "raw", "raw": "{\n  \"title\": \"Team Kickoff\",\n  \"description\": \"Trip kickoff meeting\",\n  \"location\": \"São Paulo\",\n  \"starts_at\": \"2025-07-05T14:00:00\",\n  \"ends_at\": \"2025-07-05T16:00:00\"\n}" },
+						"url": "{{baseUrl}}/trips/{{tripId}}/events"
+					}
+				},
+				{
+					"name": "Create Event Invalid Dates",
+					"event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status is 400 when ends_at is before starts_at', () => pm.response.to.have.status(400));"] } }],
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": { "mode": "raw", "raw": "{\n  \"title\": \"Bad Event\",\n  \"starts_at\": \"2025-07-06T16:00:00\",\n  \"ends_at\": \"2025-07-06T14:00:00\"\n}" },
+						"url": "{{baseUrl}}/trips/{{tripId}}/events"
+					}
+				},
+				{
+					"name": "List Events",
+					"event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status is 200 and array', () => {", "  pm.response.to.have.status(200);", "  pm.expect(pm.response.json()).to.be.an('array');", "});"] } }],
+					"request": { "method": "GET", "url": "{{baseUrl}}/trips/{{tripId}}/events" }
+				},
+				{
+					"name": "Get Event",
+					"event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status is 200', () => pm.response.to.have.status(200));", "pm.test('title matches', () => pm.expect(pm.response.json().title).to.eql('Team Kickoff'));"] } }],
+					"request": { "method": "GET", "url": "{{baseUrl}}/trips/{{tripId}}/events/{{eventId}}" }
+				},
+				{
+					"name": "Update Event",
+					"event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status is 200', () => pm.response.to.have.status(200));", "pm.test('title updated', () => pm.expect(pm.response.json().title).to.eql('Team Kickoff v2'));"] } }],
+					"request": {
+						"method": "PUT",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": { "mode": "raw", "raw": "{\n  \"title\": \"Team Kickoff v2\",\n  \"description\": \"Trip kickoff meeting\",\n  \"location\": \"São Paulo\",\n  \"starts_at\": \"2025-07-05T14:00:00\",\n  \"ends_at\": \"2025-07-05T17:00:00\"\n}" },
+						"url": "{{baseUrl}}/trips/{{tripId}}/events/{{eventId}}"
+					}
+				},
+				{
+					"name": "Delete Event",
+					"event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status is 204', () => pm.response.to.have.status(204));"] } }],
+					"request": { "method": "DELETE", "url": "{{baseUrl}}/trips/{{tripId}}/events/{{eventId}}" }
 				}
 			]
 		}
