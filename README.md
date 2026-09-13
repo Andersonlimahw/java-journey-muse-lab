@@ -6,12 +6,13 @@ and 4 latent bugs fixed. Spring Boot 3.3.1 · Java 21 · H2 + Flyway.
 
 ## Quickstart
 
-Prerequisites: JDK 21, Maven 3.x.
+Prerequisites: JDK 21 (pinned in `.java-version` for jenv/sdkman/asdf;
+the build targets Java 21 bytecode, newer JDKs are untested), Maven 3.x.
 
 ```bash
-mvn test                    # 45 tests, 6 classes — must be green
+mvn test                    # 66 tests, 7 classes — must be green
 mvn spring-boot:run         # API on http://localhost:8080
-./scripts/validate-api.sh   # 23-request black-box validation (curl + jq)
+./scripts/validate-api.sh   # 29-request black-box validation (curl + jq)
 ```
 
 Postman: import `src/test/postman/java-journey-muse-lab.postman_collection.json`
@@ -32,11 +33,12 @@ src/main/java/com/muse/journey/
     ├── trips/                  # TripController, TripService, TripRepository, DTOs
     ├── participants/           # ParticipantController/Service/Repository, DTOs
     ├── activities/             # ActivityController/Service/Repository, DTOs
-    └── links/                  # LinkController/Service/Repository, DTOs
+    ├── links/                  # LinkController/Service/Repository, DTOs
+    └── events/                 # TripEventController/Service/Repository, DTOs
 src/test/java/com/muse/journey/ # Mirror of the slices + regression tests
 src/test/postman/               # Collection + local environment
 scripts/validate-api.sh         # Executable curl mirror of the collection
-docs/adr/0001-*.md              # ADR with mermaid diagrams + bugfix log
+docs/adr/000*.md                # ADRs with mermaid diagrams + bugfix log
 docs/architecture.md            # C4, ownership table, ER diagram, verification map
 ```
 
@@ -60,6 +62,8 @@ API** (e.g. trips invites through `ParticipantService`, never the repository).
 | GET / PUT / DELETE | `/trips/{id}/activities/{activityId}` | activities |
 | POST / GET | `/trips/{id}/links` | links |
 | GET / PUT / DELETE | `/trips/{id}/links/{linkId}` | links |
+| POST / GET | `/trips/{id}/events` | events |
+| GET / PUT / DELETE | `/trips/{id}/events/{eventId}` | events |
 
 ## What changed vs the original
 
@@ -68,3 +72,8 @@ controller split into 4 slice controllers + `TripService`, `updateTrip` now
 sets `startsAt` (was `endsAt` twice), invite returns only the invited rows
 (was `findAll()`), create-trip returns DTOs instead of JPA entities, and the
 links CRUD gained 9 tests + Postman coverage.
+
+See [ADR 0002](docs/adr/0002-trip-events-slice.md): new `events` slice owning
+the `TripEvent` aggregate (`/trips/{id}/events` CRUD, Flyway V5), following
+the same vertical-slice rules — 20 MockMvc tests + Postman folder +
+`validate-api.sh` coverage.

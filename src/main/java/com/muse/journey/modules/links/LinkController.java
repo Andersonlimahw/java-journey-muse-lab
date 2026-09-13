@@ -36,6 +36,10 @@ public class LinkController {
 
     @GetMapping
     public ResponseEntity<List<LinkData>> getAllLinks(@PathVariable UUID id) {
+        Optional<Trip> trip = this.tripRepository.findById(id);
+        if (trip.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
         List<LinkData> linkDataList = this.linkService.getAllLinksFromTrip(id);
         return ResponseEntity.ok(linkDataList);
     }
