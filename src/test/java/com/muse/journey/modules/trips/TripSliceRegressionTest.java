@@ -1,10 +1,9 @@
 package com.muse.journey.modules.trips;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeEach;
+import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -30,13 +29,9 @@ class TripSliceRegressionTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @Autowired
-    private TripRepository tripRepository;
-
-    @BeforeEach
-    void setUp() {
-        tripRepository.deleteAll();
-    }
+    // No global cleanup: the shared in-memory DB keeps rows from other test
+    // classes, and wiping trips would violate their FKs. Every assertion below
+    // is scoped to the trip it creates, so order-independence holds without it.
 
     private String createTrip(String destination, String... invites) throws Exception {
         String json = objectMapper.writeValueAsString(Map.of(

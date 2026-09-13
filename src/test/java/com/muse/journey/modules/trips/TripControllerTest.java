@@ -3,7 +3,7 @@ package com.muse.journey.modules.trips;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -29,8 +29,9 @@ class TripControllerTest {
 
     @BeforeEach
     void setUp() {
-        tripRepository.deleteAll();
-
+        // No tripRepository.deleteAll(): rows from other test classes share this
+        // in-memory DB and wiping trips would violate their FKs. Assertions use
+        // savedTrip directly, so no global cleanup is needed.
         Trip trip = new Trip();
         trip.setDestination("Lisbon");
         trip.setStartsAt(LocalDateTime.parse("2026-08-01T10:00:00"));
