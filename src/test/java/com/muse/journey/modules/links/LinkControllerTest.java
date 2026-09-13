@@ -91,6 +91,12 @@ class LinkControllerTest {
     }
 
     @Test
+    void getLinks_NonExistentTrip_Returns404() throws Exception {
+        mockMvc.perform(get("/trips/{id}/links", "00000000-0000-0000-0000-000000000000"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     void getLink_ValidId_Returns200() throws Exception {
         String linkId = createLink("Airbnb", "https://airbnb.com/rooms/1");
 

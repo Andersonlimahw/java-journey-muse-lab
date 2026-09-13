@@ -109,7 +109,7 @@ before `starts_at` → 400.
 
 ## Verification
 
-- `mvn test` → **65/65 green** (7 classes: +20 `TripEventControllerTest`)
+- `mvn test` → **66/66 green** (7 classes: +20 `TripEventControllerTest`, +1 links 404-harmonization test)
 - `src/test/postman/java-journey-muse-lab.postman_collection.json` (29
   requests: +6 `events` folder, captures `eventId`) + `local.postman_environment.json`
 - `./scripts/validate-api.sh [baseUrl]` — extended with the events slice

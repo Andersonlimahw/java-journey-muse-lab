@@ -112,7 +112,10 @@ erDiagram
 - ✅ Contract growth only: no existing path, verb or status changed
   (Postman 23 → 29 requests, `validate-api.sh` extended, old requests untouched).
 - ✅ Coverage: `TripEventControllerTest` (20 tests: create/list/get/update/
-  delete + 400s + cross-trip 404s), `mvn test` 45 → 65 green.
-- ⚠️ Known pre-existing inconsistency left alone: `LinkController.getAllLinks`
-  does not 404 on an unknown trip while the activities/events list handlers
-  do — harmonizing it would change the links contract, so it stays as is.
+  delete + 400s + cross-trip 404s), `mvn test` 45 → 66 green.
+- ✅ Pre-existing inconsistency fixed alongside: `LinkController.getAllLinks`
+  returned 200 for an unknown trip while the activities/events list handlers
+  404 — it now resolves the trip first like every other trip-scoped list
+  handler (guard: `LinkControllerTest.getLinks_NonExistentTrip_Returns404`).
+  This is an intentional contract fix: no in-repo consumer (Postman,
+  `validate-api.sh`, regression tests) depended on the old behavior.

@@ -6,10 +6,11 @@ and 4 latent bugs fixed. Spring Boot 3.3.1 · Java 21 · H2 + Flyway.
 
 ## Quickstart
 
-Prerequisites: JDK 21, Maven 3.x.
+Prerequisites: JDK 21 (pinned in `.java-version` for jenv/sdkman/asdf;
+the build targets Java 21 bytecode, newer JDKs are untested), Maven 3.x.
 
 ```bash
-mvn test                    # 65 tests, 7 classes — must be green
+mvn test                    # 66 tests, 7 classes — must be green
 mvn spring-boot:run         # API on http://localhost:8080
 ./scripts/validate-api.sh   # 29-request black-box validation (curl + jq)
 ```

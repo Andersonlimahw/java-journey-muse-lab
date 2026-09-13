@@ -95,7 +95,7 @@ Migrations: `src/main/resources/db/migration/V1..V5__*.sql` (Flyway).
 
 | Layer | How | Where |
 |---|---|---|
-| Unit-of-slice (HTTP) | MockMvc, 65 tests, 7 classes | `src/test/java/...` |
+| Unit-of-slice (HTTP) | MockMvc, 66 tests, 7 classes | `src/test/java/...` |
 | Contract (black-box) | Postman collection, 29 requests, ordered, asserts statuses + captures ids | `src/test/postman/` |
 | Contract (CI-friendly) | Executable curl mirror of the collection | `scripts/validate-api.sh` |
 | Bugfix guards | `TripSliceRegressionTest` (update-startsAt, invite isolation), `LinkControllerTest` | `src/test/java/...` |
